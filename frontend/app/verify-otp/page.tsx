@@ -1,13 +1,68 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import api from "@/lib/axios";
 
 export default function VerifyOTPPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const email = searchParams.get("email") || "";
+
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (
+    index: number,
+    value: string
+  ) => {
+    if (!/^\d?$/.test(value)) return;
+
+    const newOtp = [...otp];
+    newOtp[index] = value;
+
+    setOtp(newOtp);
+
+    if (value && index < 5) {
+      const nextInput = document.getElementById(
+        `otp-${index + 1}`
+      ) as HTMLInputElement;
+
+      nextInput?.focus();
+    }
+  };
+
+  const handleVerify = async () => {
+    const finalOTP = otp.join("");
+
+    if (finalOTP.length !== 6) {
+      alert("Please enter 6 digit OTP");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await api.post("/auth/verify-otp", {
+        email,
+        otp: finalOTP,
+      });
+
+      alert(res.data.message);
+
+      router.push("/login");
+    } catch (error: any) {
+      alert(
+        error.response?.data?.message || "OTP Verification Failed"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-cyan-50 flex items-center justify-center px-4">
-
       <div className="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md">
 
         <h1 className="text-3xl font-bold text-center">
@@ -15,26 +70,34 @@ export default function VerifyOTPPage() {
         </h1>
 
         <p className="text-center text-gray-500 mt-3">
-          Enter the 6-digit OTP sent to your email.
+          Enter the 6-digit OTP sent to
+        </p>
+
+        <p className="text-center font-semibold text-blue-600">
+          {email}
         </p>
 
         <div className="flex justify-between mt-8 gap-2">
-
-          {[1,2,3,4,5,6].map((item)=>(
+          {otp.map((digit, index) => (
             <input
-              key={item}
+              key={index}
+              id={`otp-${index}`}
+              value={digit}
               maxLength={1}
+              onChange={(e) =>
+                handleChange(index, e.target.value)
+              }
               className="w-12 h-12 border rounded-xl text-center text-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           ))}
-
         </div>
 
         <button
-          onClick={() => router.push("/dashboard")}
+          onClick={handleVerify}
+          disabled={loading}
           className="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold"
         >
-          Verify OTP
+          {loading ? "Verifying..." : "Verify OTP"}
         </button>
 
         <p className="text-center mt-5 text-sm text-gray-500">
@@ -46,7 +109,6 @@ export default function VerifyOTPPage() {
         </p>
 
       </div>
-
     </div>
   );
 }
