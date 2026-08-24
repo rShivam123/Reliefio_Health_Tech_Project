@@ -9,9 +9,11 @@ import PasswordField from "./PasswordField";
 import GoogleButton from "./GoogleButton";
 
 import { signupUser } from "@/services/authServices";
+import { useToast } from "@/Components/shared/ToastProvider";
 
 export default function SignupForm() {
   const router = useRouter();
+  const { showToast } = useToast();
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -31,12 +33,12 @@ export default function SignupForm() {
       !formData.password ||
       !formData.confirmPassword
     ) {
-      alert("Please fill all fields");
+      showToast("Please fill all fields", "error");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+      showToast("Passwords do not match", "error");
       return;
     }
 
@@ -57,11 +59,13 @@ export default function SignupForm() {
         role: "Patient",
       });
 
-      alert(res.message);
+      showToast(res.message || "Account created. Please verify your email.", "success");
 
       router.push(`/verify-otp?email=${formData.email}`);
-    } catch (error: any) {
-      alert(error.response?.data?.message || "Signup Failed");
+    } catch (error) {
+      const message =
+        (error as { response?: { data?: { message?: string } } })?.response?.data?.message || "Signup Failed";
+      showToast(message, "error");
     } finally {
       setLoading(false);
     }

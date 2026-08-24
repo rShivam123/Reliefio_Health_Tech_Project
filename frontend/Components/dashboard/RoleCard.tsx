@@ -7,6 +7,7 @@ interface RoleCardProps {
   image: string;
   href: string;
   color: string;
+  badge?: string;
 }
 
 export default function RoleCard({
@@ -15,46 +16,34 @@ export default function RoleCard({
   image,
   href,
   color,
+  badge,
 }: RoleCardProps) {
   return (
-    <Link href={href}>
-      <div className="bg-white rounded-3xl shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer p-6 h-full">
+    <Link href={href} className="group block h-full">
+      <div className="relative h-full bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 p-7 overflow-hidden">
+        {/* Color accent bar - ties each card to its portal's real accent color */}
+        <span className={`absolute top-0 left-0 right-0 h-1.5 ${color}`} aria-hidden />
 
-        <div className="flex justify-between items-center">
+        {badge && (
+          <span className="absolute top-6 right-6 text-[11px] font-semibold uppercase tracking-wide bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full">
+            {badge}
+          </span>
+        )}
 
-          {/* <Image
-            src={image}
-            alt={title}
-            width={90}
-            height={90}
-          /> */}
-
-       <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
-  <Image
-    src={image}
-    alt={title}
-    width={78}
-    height={78}
-    className="object-contain"
-  />
-</div>
-
-          <div
-            className={`w-12 h-12 rounded-full flex items-center justify-center text-white ${color}`}
-          >
-            →
-          </div>
-
+        <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center overflow-hidden ring-1 ring-slate-100">
+          <Image src={image} alt="" width={40} height={40} className="object-contain" />
         </div>
 
-        <h2 className="mt-6 text-2xl font-bold text-gray-800">
-          {title}
-        </h2>
+        <h2 className="mt-6 text-xl font-bold text-slate-900 tracking-tight">{title}</h2>
 
-        <p className="mt-3 text-gray-600 leading-7">
-          {description}
-        </p>
+        <p className="mt-2.5 text-slate-600 leading-relaxed text-[15px]">{description}</p>
 
+        <div className="mt-6 flex items-center gap-2 text-sm font-semibold text-slate-900">
+          <span>Continue</span>
+          <span className="inline-block transition-transform duration-300 group-hover:translate-x-1" aria-hidden>
+            →
+          </span>
+        </div>
       </div>
     </Link>
   );

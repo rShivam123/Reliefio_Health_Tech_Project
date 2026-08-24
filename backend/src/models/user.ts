@@ -12,6 +12,12 @@ export interface IUser extends Document {
  resetPasswordExpire:Date
   otp?: string | null;
     otpExpiry?: Date | null;
+  // Optional patient-facing profile fields (only meaningful when role === "Patient")
+  dateOfBirth?: Date | null;
+  gender?: string | null;
+  bloodGroup?: string | null;
+  allergies?: string[];
+  currentMedications?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -70,7 +76,9 @@ const userSchema = new Schema<IUser>(
 
     role: {
       type: String,
-      enum: ["Doctor", "Patient", "Hospital"],
+      // "Hospital" retained for backward-compatibility; not used by the
+      // Doctors/Physician/Lab modules. "Lab" represents lab staff accounts.
+      enum: ["Doctor", "Patient", "Lab", "Hospital"],
       default: "Patient",
     },
 
@@ -78,6 +86,12 @@ const userSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
+
+    dateOfBirth: { type: Date, default: null },
+    gender: { type: String, default: null },
+    bloodGroup: { type: String, default: null },
+    allergies: { type: [String], default: [] },
+    currentMedications: { type: [String], default: [] },
   },
   {
     timestamps: true,

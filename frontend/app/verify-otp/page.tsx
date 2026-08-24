@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import api from "@/lib/axios";
+import { useToast } from "@/Components/shared/ToastProvider";
 
-export default function VerifyOTPPage() {
+function VerifyOTPForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { showToast } = useToast();
 
   const email = searchParams.get("email") || "";
 
@@ -37,7 +39,7 @@ export default function VerifyOTPPage() {
     const finalOTP = otp.join("");
 
     if (finalOTP.length !== 6) {
-      alert("Please enter 6 digit OTP");
+      showToast("Please enter 6 digit OTP", "error");
       return;
     }
 
@@ -49,13 +51,13 @@ export default function VerifyOTPPage() {
         otp: finalOTP,
       });
 
-      alert(res.data.message);
+      showToast(res.data.message || "Account verified successfully.", "success");
 
       router.push("/login");
-    } catch (error: any) {
-      alert(
-        error.response?.data?.message || "OTP Verification Failed"
-      );
+    } catch (error) {
+      const message =
+        (error as { response?: { data?: { message?: string } } })?.response?.data?.message || "OTP Verification Failed";
+      showToast(message, "error");
     } finally {
       setLoading(false);
     }
@@ -101,7 +103,7 @@ export default function VerifyOTPPage() {
         </button>
 
         <p className="text-center mt-5 text-sm text-gray-500">
-          Didn't receive OTP?
+          Didn&apos;t receive OTP?
 
           <span className="text-blue-600 cursor-pointer font-medium">
             {" "}Resend
@@ -110,5 +112,13 @@ export default function VerifyOTPPage() {
 
       </div>
     </div>
+  );
+}
+
+export default function VerifyOTPPage() {
+  return (
+    <Suspense fallback={null}>
+      <VerifyOTPForm />
+    </Suspense>
   );
 }
