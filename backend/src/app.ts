@@ -16,7 +16,7 @@ import { errorHandler, notFound } from "./middleware/error.middleware.js";
 
 const app = express();
 
-const allowedOrigin = process.env.CLIENT_URL || "http://localhost:3000";
+// const allowedOrigin = process.env.CLIENT_URL || "http://localhost:3000";
 
 // app.use(
 //   cors({
